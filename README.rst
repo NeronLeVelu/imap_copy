@@ -68,10 +68,10 @@ Usage:
       -h, --help        show this help message and exit
       -c, --create-mailboxes
                         Create the mailboxes on destination
-      -r, --recurse     Recurse into submailboxes
+      -r, --recurse     Recurse into submailboxes (need the -c if structure is not already existing for all folder)
       -q, --quiet       ppsssh... be quiet. (no output)
       -v, --verbose     more output please (debug level)
       -s N, --skip N    skip the first N message(s)
       -l N, --limit N   only copy N number of message(s)
   
-Only tested on Python 2.7.
+Tested on Python 3.5.
