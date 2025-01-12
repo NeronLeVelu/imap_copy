@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     imapcopy
 
@@ -10,11 +9,21 @@
     :small bug correction for recurse with python3 using bstring
 """
 
+# shebang used for binary encodding displaced here
+# -*- coding: utf-8 -*-
+# see EncodingFormat below in this new versio
+
+
 import sys
 import hashlib
 import imaplib
 import logging
 import argparse
+import copy
+
+# use natively utf-! but other can be used here
+EncodingFormat=[ 'utf-8', 'latin-1', 'ASCII' ][1]
+
 
 
 class IMAP_Copy(object):
@@ -70,7 +79,7 @@ class IMAP_Copy(object):
 
         folder_name_list = []
         for box in folder_list:
-            parts = box.decode('utf-8').split('"')
+            parts = box.decode(EncodingFormat).split('"')
             if len(parts) == 5:
                 folder_name_list.append(parts[3].strip())
             elif len(parts) == 3:
@@ -191,28 +200,37 @@ class IMAP_Copy(object):
         if self.recurse and recurse:
             self.logger.info("Getting list of folders under %s" % source_folder)
             connection = self._conn_source
-            typ, data = connection.list(source_folder)
+            typ, data_raw = connection.list(source_folder)
+            data = copy.deepcopy( data_raw)
             self.logger.info( "data (%s) contain : %s" %( type( data), data) )
-            Parent = True
             for d in data:
                 if d:
-                    if Parent:
-                       # skip parent that is just copied
-                       Parent = False
-                       continue
-                    self.logger.info( "d (%s) contain : %s" %( type( d), d) )
+                    self.logger.info( "d (%s) contain: %s" %( type( d), d) )
                     l_resp = d.split( b'"')
                     # response = '(\HasChildren) "/" INBOX'
-                    if len(l_resp) == 3:
+                    if ( len(l_resp) == 3 ) or ( len(l_resp) == 5 ):
+                        if len(l_resp) == 3:
+                            #source_mbox = d.split(b'"')[2].strip()
+                            source_mbox = l_resp[2].strip()
+                        else:
+                            source_mbox = b'"' + l_resp[3] + b'"'
+                        self.logger.info( "source_mbox (%s)  [ %s ] compare to source_folder ( %s) [%s]" \
+                          % ( type( source_mbox), source_mbox, type( source_folder), source_folder ) )
 
-                        source_mbox = d.split(b'"')[2].strip()
-                        self.logger.info( "source_mbox (%s) contain : %s" %( type( source_mbox), source_mbox) )
                         # make sure we don't have a recursive loop
-                        if source_mbox != source_folder:
+                        source_folder_b = source_folder.encode( EncodingFormat)
+                        source_folder_bq = ( '"' + source_folder + '"' ).encode( EncodingFormat)
+                        self.logger.info( "  source_folder_b ( %s) [%s]" % ( type( source_folder_b), source_folder_b ) )
+
+                        if ( source_mbox != source_folder) and ( source_mbox != source_folder_b ) \
+                          and ( source_mbox != source_folder_bq ):
                             # maybe better use regex to replace only start of the souce name
                             dest_mbox = source_mbox.replace(source_folder.encode('latin-1'), destination_folder.encode( 'latin-1'))
                             self.logger.info("starting copy of folder %s to %s " % (source_mbox, dest_mbox))
                             self.copy(source_mbox, dest_mbox, skip, limit, False)
+                    else :
+                        self.logger.info( "  skip due to not the 3 or 5 part split expected (%d) %s" %( len( l_resp), l_resp) )
+                        
 
     def run(self):
         try:
