@@ -2,7 +2,8 @@ IMAP Copy
 =========
 
 This is a very simple tool to copy folders from one IMAP server to another server.
-
+This fork version use python 3.5 and modification for use of latin-1 as alternative to utf-8
+especially for recurse option (2025)
 
 Example:
 
@@ -39,7 +40,8 @@ message no. 124 to 223 into Gmail.
 
 There is also 'recurse' option that copies contents of folders with all of
 its subfolders. Also if you replace source mailbox with empty string, it will
-copy all contents of that mailbox:
+copy all contents of that mailbox. Recurse is often used with -c (create)
+if structure in target server dont already have each occurence of the folder tree:
 
 :: 
 
