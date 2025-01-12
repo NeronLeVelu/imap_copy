@@ -6,12 +6,15 @@
 
     :copyright: (c) 2013 by Christoph Heer.
     :license: BSD, see LICENSE for more details.
-    :small bug correction for recurse with python3 using bstring
+
+    : 2025 by Roald Dupuis
+    : small bug correction for recurse with python3 using bstring
+    : add latin-1 encoding to native utf-8
 """
 
 # shebang used for binary encodding displaced here
 # -*- coding: utf-8 -*-
-# see EncodingFormat below in this new versio
+# see EncodingFormat variable below in this new version
 
 
 import sys
